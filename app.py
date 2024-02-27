@@ -91,7 +91,7 @@ def delete_user(id_user):
         db.session.commit()
         return jsonify({"message": f"Usuário {id_user} excluído com sucesso"})
     
-    retun jsonify({"message": "Usuário não encontrado"}),404
+    return jsonify({"message": "Usuário não encontrado"}),404
 
 if __name__ == '__main__':
     app.run(debug=True)
