@@ -5,7 +5,7 @@ from database import db
 
 app= Flask(__name__)
 app.config['SECRET_KEY']= "your_secret_key"
-app.config['SQLALCHEMY_DATABASE_URI']= 'sqlite:///database.db'
+app.config['SQLALCHEMY_DATABASE_URI']= 'mysql+pymysql://adm:Dgyv4064&@127.0.0.1:3306/flask-crud'
 
 login_manager= LoginManager()
 db.init_app(app)
@@ -47,7 +47,7 @@ def create_user():
     password = data.get("password")
 
     if username and password:
-        user= User(username= username, password= password)
+        user= User(username= username, password= password, role='user')
         db.session.add(user)
         db.session.commit()
         return jsonify({"message": "Usuário cadastrado com sucesso"})
@@ -69,7 +69,10 @@ def read_user(id_user):
 def update_user(id_user):
     data = request.json
     user = User.query.get(id_user)
-
+    
+    if id_user != current_user.id and current_user.role == "user":
+        return jsonify({"message": "Operação não autorizada"}),403
+    
     if user and data.get("password"):
         user.password = data.get("password")
         db.session.commit()
@@ -83,8 +86,11 @@ def update_user(id_user):
 def delete_user(id_user):
     user = User.query.get(id_user)
 
+    if  current_user.role != "admin":
+        return jsonify({"message": "Operação não autorizada"}),403
+    
     if id_user == current_user.id:
-        return jsonify({"message": "Voce não pode excluir o usuário atual"}),403
+        return jsonify({"message": "Você não pode excluir o usuário atual"}),403
 
     if user and id_user != current_user.id:
         db.session.delete(user)
